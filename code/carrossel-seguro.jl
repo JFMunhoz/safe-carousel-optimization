@@ -17,40 +17,43 @@ end
 
 # Função para resolver o problema do carrossel
 function solve_carousel(n, weights, time_limit::Int)
-    k = n ÷ 2  # k é sempre n/2
+    m = n ÷ 2  # k é sempre n/2
 
     # Criando o modelo usando o solver HiGHS
     model = Model(HiGHS.Optimizer)
     
-    # Variáveis de decisão x[i, j] = 1 se a criança j sentar no assento i
+    # Define the variables
     @variable(model, x[1:n, 1:n], Bin)
-    
-    # Definindo a variável W (o peso máximo das k cadeiras consecutivas)
-    @variable(model, W >= 0)
-    
-    # Objetivo: minimizar W
+    @variable(model, W)
+    @variable(model, W_i[1:n])
+    @variable(model, p_i[1:n])
+
+    # Step 5: Set up the objective function
     @objective(model, Min, W)
 
-    # Restrições: Cada criança deve sentar em exatamente um assento
-    for j in 1:n
-        @constraint(model, sum(x[i, j] for i in 1:n) == 1)
-    end
+    # Step 6: Set up the constraints
+    @constraint(model, [i=1:n], W >= W_i[i])
+    @constraint(model, [i=1:n], W_i[i] == sum(p_i[i + k] for k in 0:(div(n, 2)-1) if i + k <= n))
+    @constraint(model, [i=1:n], p_i[i] == sum(weights[j] * x[i, j] for j in 1:n))
+    @constraint(model, [j=1:n], sum(x[i, j] for i in 1:n) == 1)
+    @constraint(model, [i=1:n], sum(x[i, j] for j in 1:n) == 1)
 
-    # Cada assento deve ser ocupado por exatamente uma criança
-    for i in 1:n
-        @constraint(model, sum(x[i, j] for j in 1:n) == 1)
-    end
+    # Set the time limit for the solver
+    set_time_limit_sec(model, time_limit)
 
-    # Definindo o peso W_i para cada grupo de assentos i
-    for i in 1:n
-        @constraint(model, W >= sum(weights[(i + l - 1) % n + 1] * x[(i + l - 1) % n + 1, j] for l in 1:k for j in 1:n))
-    end
-
-    # Configurando o tempo limite no solver HiGHS
-    set_optimizer_attribute(model, "time_limit", float(time_limit))  # Convert to Float64
-
-    # Resolve o modelo
+    # Step 7: Solve the problem
     optimize!(model)
+
+    # Step 8: Display the results
+    println("Optimal value of W: ", value(W))
+    println("Optimal assignment:")
+    for i in 1:n
+        for j in 1:n
+            if value(x[i, j]) > 0.5
+                println("Child $j is assigned to position $i")
+            end
+        end
+    end
 
     # Extrai o valor ótimo de W
     W_opt = value(W)
@@ -59,7 +62,7 @@ end
 
 
 # Função principal que lê a entrada e processa a solução
-function main()    
+function main()
     # Lê a entrada (número de crianças e seus pesos)
     n, weights = read_input()
 

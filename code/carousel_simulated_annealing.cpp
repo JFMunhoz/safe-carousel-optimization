@@ -41,7 +41,24 @@ void swap(std::vector<int>& solution) {
 }
 
 // Simulated Annealing to solve the problem
-std::vector<int> simulated_annealing(int n, const std::vector<double>& weights, int k, double initial_temp, double cooling_rate, int max_iterations) {
+std::vector<int> simulated_annealing(std::vector<int> initial_solutoin, const std::vector<double>& weights, double initial_temp, double cooling_rate, int max_iterations) {
+    // Generate the initial solution
+    std::vector<int> current_solution = generate_initial_solution(n);
+    double current_cost = calculate_weight(current_solution, weights, k);
+
+    std::vector<int> best_solution = current_solution;
+    double best_cost = current_cost;
+
+    double temp = initial_temp;
+
+    while(temperature > final_temp)
+
+    return best_solution;
+}
+
+
+// Simulated Annealing to solve the problem
+std::vector<int> simulated_annealing(int n, const std::vector<double>& weights, double initial_temp, double cooling_rate, int max_iterations) {
     // Generate the initial solution
     std::vector<int> current_solution = generate_initial_solution(n);
     double current_cost = calculate_weight(current_solution, weights, k);
@@ -115,42 +132,12 @@ void write_output(const std::vector<int>& best_solution, const std::string& outp
     out.close();
 }
 
-// Function to parse the command-line arguments
-void parse_args(int argc, char* argv[], double& initial_temp, double& cooling_rate, int& max_iterations, std::string& output_file) {
-    if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " <output_file> [options]" << std::endl;
-        exit(1);
-    }
-
-    output_file = argv[1];  // First argument is the output file
-
-    // Default parameters for Simulated Annealing
-    initial_temp = 1000.0;
-    cooling_rate = 0.995;
-    max_iterations = 10000;
-
-    // Parse optional parameters
-    for (int i = 2; i < argc; i++) {
-        std::string arg = argv[i];
-        if (arg == "--initial-temp" || arg == "-t") {
-            initial_temp = std::stod(argv[++i]);
-        } else if (arg == "--cooling-rate" || arg == "-c") {
-            cooling_rate = std::stod(argv[++i]);
-        } else if (arg == "--max-iterations" || arg == "-i") {
-            max_iterations = std::stoi(argv[++i]);
-        } else {
-            std::cerr << "Unknown argument: " << arg << std::endl;
-            exit(1);
-        }
-    }
-}
 
 int main(int argc, char* argv[]) {
     // Parse command-line arguments
     double initial_temp, cooling_rate;
     int max_iterations;
     std::string output_file;
-    parse_args(argc, argv, initial_temp, cooling_rate, max_iterations, output_file);
 
     // Seed the random number generator
     srand(time(0));
