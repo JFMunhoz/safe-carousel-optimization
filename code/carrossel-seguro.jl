@@ -2,6 +2,7 @@ using JuMP
 using HiGHS
 using Printf
 using ArgParse  # Para capturar argumentos da linha de comando
+using TimerOutputs  # Para medir o tempo de execução
 
 # Função para ler entrada a partir da entrada padrão
 function read_input()
@@ -15,7 +16,7 @@ function read_input()
 end
 
 # Função para resolver o problema do carrossel
-function solve_carousel(n, weights)
+function solve_carousel(n, weights, time_limit::Int)
     k = n ÷ 2  # k é sempre n/2
 
     # Criando o modelo usando o solver HiGHS
@@ -45,6 +46,9 @@ function solve_carousel(n, weights)
         @constraint(model, W >= sum(weights[(i + l - 1) % n + 1] * x[(i + l - 1) % n + 1, j] for l in 1:k for j in 1:n))
     end
 
+    # Configurando o tempo limite no solver HiGHS
+    set_optimizer_attribute(model, "time_limit", float(time_limit))  # Convert to Float64
+
     # Resolve o modelo
     optimize!(model)
 
@@ -53,13 +57,17 @@ function solve_carousel(n, weights)
     return W_opt
 end
 
+
 # Função principal que lê a entrada e processa a solução
 function main()    
     # Lê a entrada (número de crianças e seus pesos)
     n, weights = read_input()
 
+    # Define o tempo máximo em segundos (30 minutos = 1800 segundos)
+    time_limit = 1800
+
     # Resolve o problema do carrossel
-    BKV = solve_carousel(n, weights)
+    BKV = solve_carousel(n, weights, time_limit)
 
     # Imprime a melhor solução na saída padrão
     println("Melhor solução encontrada: ", round(BKV, digits=2))
