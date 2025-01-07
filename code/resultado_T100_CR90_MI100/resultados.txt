@@ -1,0 +1,29 @@
+Input file: ocs_10.txt, Best W: 1237582
+Input file: ocs_1.txt, Best W: 50514
+Input file: ocs_2.txt, Best W: 51664
+Input file: ocs_3.txt, Best W: 194405
+Input file: ocs_4.txt, Best W: 199849
+Input file: ocs_5.txt, Best W: 435990
+Input file: ocs_6.txt, Best W: 445892
+Input file: ocs_7.txt, Best W: 783459
+Input file: ocs_8.txt, Best W: 787966
+Input file: ocs_9.txt, Best W: 1248831
+Input file: ocs_10.txt,
+ocs_1.txt,
+ocs_2.txt,
+ocs_3.txt,
+ocs_4.txt,
+ocs_5.txt,
+ocs_6.txt,
+ocs_7.txt,
+ocs_8.txt,
+ocs_9.txt,, Best W: ocs_10.txt,
+ocs_1.txt,
+ocs_2.txt,
+ocs_3.txt,
+ocs_4.txt,
+ocs_5.txt,
+ocs_6.txt,
+ocs_7.txt,
+ocs_8.txt,
+ocs_9.txt,
