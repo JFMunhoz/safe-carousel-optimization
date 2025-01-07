@@ -20,23 +20,16 @@ void read_input(const std::string& input_file, int& n, std::vector<int>& weights
     }
 }
 
-// Function to save the result to output file
-void save_output(const std::string& output_file, const std::string& input_file, double initial_temp, double cooling_rate, int max_iterations, const std::vector<int>& solution, int best_W) {
-    std::ofstream outfile(output_file);
-    if (!outfile) {
-        std::cerr << "Error opening output file: " << output_file << std::endl;
-        exit(1);
+// Function to compute the objective function W
+int compute_W_old(const std::vector<int>& assignment, const std::vector<int>& weights, int k) {
+    int n = weights.size();
+    std::vector<int> W(n, 0);
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < k; ++j) {
+            W[i] += weights[assignment[(i + j) % n]];
+        }
     }
-    outfile << "Input file: " << input_file << std::endl;
-    outfile << "Initial temperature: " << initial_temp << std::endl;
-    outfile << "Cooling rate: " << cooling_rate << std::endl;
-    outfile << "Max iterations: " << max_iterations << std::endl;
-    outfile << "Best W: " << best_W << std::endl;
-    outfile << "Best Assignment: ";
-    for (int i = 0; i < solution.size(); ++i) {
-        outfile << solution[i] << " ";
-    }
-    outfile << std::endl;
+    return *std::max_element(W.begin(), W.end());
 }
 
 // Function to compute the objective function W
@@ -51,19 +44,19 @@ int compute_W(const std::vector<int>& assignment, const std::vector<int>& weight
     return *std::max_element(W.begin(), W.end());
 }
 
+
 // Simulated annealing algorithm
-std::vector<int> simulated_annealing(const std::vector<int>& weights, double initial_temp, double cooling_rate, int max_iterations, const std::string& input_file) {
-    int n = weights.size();
+std::vector<int> simulated_annealing(const std::vector<int>& initial_solution, double initial_temp, double cooling_rate, int max_iterations, const std::string& input_file) {
+    int n = initial_solution.size();
     int k = n / 2;
-
-    // Create an initial solution
-    std::vector<int> initial_solution(n);
-    for (int i = 0; i < n; ++i) {
-        initial_solution[i] = i;
-    }
-
     std::vector<int> best_solution = initial_solution;
-    int best_W = compute_W(initial_solution, weights, k);
+
+    //Vector assignment says which children is seating on seat i
+    std::vector<int> assignment;
+    for (int i = 0; i < n; ++i){
+        assignment[i] = i;
+    }
+    int best_W = compute_W(assignment, initial_solution, k);
 
     double temp = initial_temp;
     std::vector<int> current_solution = initial_solution;
@@ -76,7 +69,7 @@ std::vector<int> simulated_annealing(const std::vector<int>& weights, double ini
             int pos2 = rand() % n;
             std::swap(new_solution[pos1], new_solution[pos2]);
 
-            int new_W = compute_W(new_solution, weights, k);
+            int new_W = compute_W(new_solution, initial_solution, k);
             int delta = new_W - current_W;
 
             if (delta <= 0 || exp(-delta / temp) > ((double)rand() / RAND_MAX)) {
@@ -94,6 +87,25 @@ std::vector<int> simulated_annealing(const std::vector<int>& weights, double ini
     }
 
     return best_solution;
+}
+
+// Function to save the result to output file
+void save_output(const std::string& output_file, const std::string& input_file, double initial_temp, double cooling_rate, int max_iterations, const std::vector<int>& solution, int best_W) {
+    std::ofstream outfile(output_file);
+    if (!outfile) {
+        std::cerr << "Error opening output file: " << output_file << std::endl;
+        exit(1);
+    }
+    outfile << "Input file: " << input_file << std::endl;
+    outfile << "Initial temperature: " << initial_temp << std::endl;
+    outfile << "Cooling rate: " << cooling_rate << std::endl;
+    outfile << "Max iterations: " << max_iterations << std::endl;
+    outfile << "Best W: " << best_W << std::endl;
+    outfile << "Best Assignment: ";
+    for (int i = 0; i < solution.size(); ++i) {
+        outfile << solution[i] << " ";
+    }
+    outfile << std::endl;
 }
 
 int main(int argc, char* argv[]) {
@@ -114,7 +126,10 @@ int main(int argc, char* argv[]) {
     std::vector<int> weights;
     read_input(input_file, n, weights);
 
-    std::vector<int> best_solution = simulated_annealing(weights, initial_temp, cooling_rate, max_iterations, input_file);
+    // Use the weights as the initial solution
+    std::vector<int> initial_solution = weights;
+
+    std::vector<int> best_solution = simulated_annealing(initial_solution, initial_temp, cooling_rate, max_iterations, input_file);
     int best_W = compute_W(best_solution, weights, n / 2);
 
     save_output(output_file, input_file, initial_temp, cooling_rate, max_iterations, best_solution, best_W);
