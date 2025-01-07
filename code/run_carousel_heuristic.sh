@@ -1,13 +1,20 @@
 #!/bin/bash
 
+# List of input files
+input_files=("ocs_1.txt" "ocs_2.txt" "ocs_3.txt" "ocs_4.txt" "ocs_5.txt" "ocs_6.txt")
+
+# Parameters for the heuristic
+initial_temp=1000
+cooling_rate=0.95
+max_iterations=100000
+
 # Loop through each input file
-for input_file in ocs_*.txt; do
-    # Extract the number from the input file name
-    number=$(echo $input_file | grep -o -E '[0-9]+')
-    
-    # Define the output file name
-    output_file="output_ocs_$number.txt"
-    
-    # Run the C++ program with the input and output files
-    ./carousel $output_file $input_file 1000 0.95 1000
+for input_file in "${input_files[@]}"
+do
+    # Extract the base name (without extension) to use for the output file
+    base_name=$(basename "$input_file" .txt)
+    output_file="resultado_${base_name}.txt"
+
+    # Run the C++ program with the input file and save the output to the output file
+    ./carousel "$output_file" "$input_file" $initial_temp $cooling_rate $max_iterations
 done
