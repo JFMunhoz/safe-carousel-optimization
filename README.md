@@ -41,8 +41,10 @@ Testing was performed on instances with varying numbers of children. Comparisons
    git clone https://github.com/username/safe-carousel.git
    cd safe-carousel
 2. Compile the Simulated Annealing algorithm:
+    ```bash
    g++ -o simulated_annealing src/simulated_annealing.cpp
 3. Run the algorithm:
+    ```bash
    ./simulated_annealing <input_file> <initial_temp> <cooling_rate> <max_iterations>
 
 Created by João Francisco Hirtenkauf Munhoz and Leonardo Heisler, November 2024.
