@@ -35,7 +35,7 @@ function solve_carousel(n, weights)
 
     # Step 6: Set up the constraints
     @constraint(model, [i=1:n], W >= W_i[i])
-    @constraint(model, [i=1:n], W_i[i] == sum(p_i[i + k] for k in 0:(div(n, 2)-1) if i + k <= n))
+    @constraint(model, [i=1:n], W_i[i] == sum(p_i[rem((i + k-1), n)+1] for k in 0:(div(n, 2)-1)))
     @constraint(model, [i=1:n], p_i[i] == sum(weights[j] * x[i, j] for j in 1:n))
     @constraint(model, [j=1:n], sum(x[i, j] for i in 1:n) == 1)
     @constraint(model, [i=1:n], sum(x[i, j] for j in 1:n) == 1)
@@ -61,7 +61,7 @@ function solve_carousel(n, weights)
     for i in 1:n
         for j in 1:n
             if value(x[i, j]) > 0.5
-                println("Child $j is assigned to position $i")
+                #println("Child $j is assigned to position $i")
             end
         end
     end
